@@ -1,5 +1,16 @@
 import Glibc
 
+extension String {
+    var withTrimmedNewline: String {
+        if characters.last! == "\n" {
+            var result = self
+            result.characters = characters[characters.startIndex..<characters.endIndex.predecessor()]
+            return result
+        } else {
+            return self
+        }
+    }
+}
 
 public class FileHandle {
 
@@ -35,11 +46,6 @@ public class FileHandle {
     }
 
     public func readLine(stripNewlines: Bool = true) -> String? {
-        func stripNewline(_ str: inout String) {
-            if str.characters.last! == "\n" { 
-                str.characters = str.characters[str.characters.startIndex..<str.characters.endIndex.predecessor()]
-            }
-        }
         var input: UnsafeMutablePointer<Int8>?
         var lim = 0
         let read = getline(&input, &lim, fp)
@@ -47,12 +53,20 @@ public class FileHandle {
         if read > 0 {
             var result = String(cString: input!)
             if stripNewlines{
-                stripNewline(&result)
+                result = result.withTrimmedNewline 
             }
             return result
         } else {
             return nil
         }
+    }
+
+    public func read(bytes: Int = 1) -> String {
+        var input: UnsafeMutablePointer<Int8>?
+        defer { input!.deallocateCapacity(1) }
+        fread(&input, 1, bytes, fp)
+        let result = String(cString: input!)
+        return result
     }
 
     public func close() {
@@ -62,6 +76,17 @@ public class FileHandle {
     public func write(data: String) {
         let length = data.utf8.count
         fwrite(data, 1, length, fp)
+    }
+
+    public func writeLine(_ line: String) {
+        print("About to write line")
+        write(data: line)
+        print("About to check last char")
+        if line.characters.last! != "\n" {
+            print("Checked last char, got newline")
+            write(data: "\n")
+        }
+        print("Didn't get newline")
     }
 }
 
