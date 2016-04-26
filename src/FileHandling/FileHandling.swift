@@ -62,10 +62,11 @@ public class FileHandle {
     }
 
     public func read(bytes: Int = 1) -> String {
-        var input: UnsafeMutablePointer<Int8>?
-        defer { input!.deallocateCapacity(1) }
-        fread(&input, 1, bytes, fp)
-        let result = String(cString: input!)
+        var input = UnsafeMutablePointer<Int8>(allocatingCapacity: bytes + 1)
+        defer { input.deallocateCapacity(bytes + 1) }
+        fread(input, 1, bytes, fp)
+        input[bytes] = 0  // Set to 0 so that String(cString:) doesn't fail when it calls strlen().
+        let result = String(cString: input)
         return result
     }
 
@@ -79,14 +80,11 @@ public class FileHandle {
     }
 
     public func writeLine(_ line: String) {
-        print("About to write line")
         write(data: line)
-        print("About to check last char")
         if line.characters.last! != "\n" {
             print("Checked last char, got newline")
             write(data: "\n")
         }
-        print("Didn't get newline")
     }
 }
 
