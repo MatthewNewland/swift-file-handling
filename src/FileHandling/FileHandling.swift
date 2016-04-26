@@ -11,7 +11,7 @@ public class FileHandle {
 
     private let path: String
     private let mode: Mode
-    private let fd: UnsafeMutablePointer<FILE>
+    private var fp: UnsafeMutablePointer<FILE>
 
     private static func cmodeFromMode(mode: Mode) -> String {
         switch mode {
@@ -26,8 +26,13 @@ public class FileHandle {
 
     public init(path: String, mode: FileHandle.Mode) throws {
         self.path = path
-        self.fd = fopen(path, FileHandle.cmodeFromMode(mode: mode))
+        self.fp = fopen(path, FileHandle.cmodeFromMode(mode: mode))
+        print(self.fp)
         self.mode = mode
+    }
+
+    deinit {
+        close()
     }
 
     public func readLine(stripNewlines: Bool = true) -> String? {
@@ -38,7 +43,7 @@ public class FileHandle {
         }
         var input: UnsafeMutablePointer<Int8>?
         var lim = 0
-        let read = getline(&input, &lim, fd)
+        let read = getline(&input, &lim, fp)
         defer { input!.deallocateCapacity(1) } 
         if read > 0 {
             var result = String(cString: input!)
@@ -49,6 +54,15 @@ public class FileHandle {
         } else {
             return nil
         }
+    }
+
+    public func close() {
+        fclose(self.fp)
+    }
+
+    public func write(data: String) {
+        let length = data.utf8.count
+        fwrite(data, 1, length, fp)
     }
 }
 
