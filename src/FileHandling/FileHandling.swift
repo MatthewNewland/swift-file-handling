@@ -27,7 +27,6 @@ public class FileHandle {
     public init(path: String, mode: FileHandle.Mode) throws {
         self.path = path
         self.fp = fopen(path, FileHandle.cmodeFromMode(mode: mode))
-        print(self.fp)
         self.mode = mode
     }
 
