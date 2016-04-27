@@ -15,10 +15,20 @@ print("\n\nwriteLine(_:) test\n\n")
 let ohandle = try! FileHandle(path: "./test.txt", mode: .WriteOnly)
 print("Got here")
 for line in [
-        "Hello\n",
-        "My name is\n",
-        "Bob\n"] {
+        "Hello",
+        "My name is",
+        "Bob"] {
     ohandle.writeLine(line)
 }
 
 ohandle.close()
+
+let ihandle3 = try! FileHandle(path: "./test.txt", mode: .ReadOnly)
+for line in ihandle3.lines {
+    print(line)
+}
+
+for line in FileHandle.stdin.lines {
+    print(line)
+}
+

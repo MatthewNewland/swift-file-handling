@@ -12,7 +12,11 @@ extension String {
     }
 }
 
-public class FileHandle {
+public struct FileHandle {
+    
+    public static var stdin = FileHandle(filePointer: Glibc.stdin)
+    public static var stdout = FileHandle(filePointer: Glibc.stdout)
+    public static var stderr = FileHandle(filePointer: Glibc.stderr)
 
     public enum Mode {
         case ReadOnly
@@ -20,8 +24,6 @@ public class FileHandle {
         case Append
     }
 
-    private let path: String
-    private let mode: Mode
     private var fp: UnsafeMutablePointer<FILE>
 
     private static func cmodeFromMode(mode: Mode) -> String {
@@ -36,20 +38,18 @@ public class FileHandle {
     }
 
     public init(path: String, mode: FileHandle.Mode) throws {
-        self.path = path
         self.fp = fopen(path, FileHandle.cmodeFromMode(mode: mode))
-        self.mode = mode
     }
 
-    deinit {
-        close()
+    public init(filePointer: UnsafeMutablePointer<FILE>) {
+        self.fp = filePointer
     }
 
     public func readLine(stripNewlines: Bool = true) -> String? {
         var input: UnsafeMutablePointer<Int8>?
         var lim = 0
         let read = getline(&input, &lim, fp)
-        defer { input!.deallocateCapacity(1) } 
+        defer { input!.deallocateCapacity(lim) } 
         if read > 0 {
             var result = String(cString: input!)
             if stripNewlines{
@@ -82,8 +82,13 @@ public class FileHandle {
     public func writeLine(_ line: String) {
         write(data: line)
         if line.characters.last! != "\n" {
-            print("Checked last char, got newline")
             write(data: "\n")
+        }
+    }
+
+    public var lines: AnyIterator<String> {
+        return AnyIterator {
+            return self.readLine()
         }
     }
 }
