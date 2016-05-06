@@ -4,7 +4,7 @@ extension String {
     var withTrimmedNewline: String {
         if characters.last! == "\n" {
             var result = self
-            result.characters.dropLast() 
+            result.characters = result.characters.dropLast(1)
             return result
         } else {
             return self
