@@ -25,6 +25,10 @@ public struct FileHandle {
     }
 
     private var fp: UnsafeMutablePointer<FILE>
+    
+    public var fileno: Int32 {
+        return Glibc.fileno(fp)
+    }
 
     private static func cmodeFromMode(mode: Mode) -> String {
         switch mode {
@@ -43,6 +47,10 @@ public struct FileHandle {
 
     public init(filePointer: UnsafeMutablePointer<FILE>) {
         self.fp = filePointer
+    }
+
+    public init(fileDescriptor fd: Int32, mode: FileHandle.Mode) {
+        self.fp = Glibc.fdopen(fd, FileHandle.cmodeFromMode(mode: mode))
     }
 
     public func readLine(stripNewlines: Bool = true) -> String? {
