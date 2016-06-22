@@ -1,12 +1,14 @@
+import FileHandling
+
 print("readLine() test:\n\n")
-let ihandle = try! FileHandle(path: "./main.swift", mode: .ReadOnly)
+let ihandle = try! FileHandle(path: "/etc/bash.bashrc", mode: .ReadOnly)
 while let line = ihandle.readLine() {
     print(line)
 }
 ihandle.close()
 
 print("\n\nread(bytes:) test:\n\n")
-let ihandle2 = try! FileHandle(path: "./main.swift", mode: .ReadOnly)
+let ihandle2 = try! FileHandle(path: "/etc/bash.bashrc", mode: .ReadOnly)
 let data = ihandle2.read(bytes: 22)
 print(data)
 ihandle2.close()
